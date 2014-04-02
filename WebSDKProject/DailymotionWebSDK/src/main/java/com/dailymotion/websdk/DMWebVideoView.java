@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -23,8 +24,11 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.VideoView;
 
+import java.util.List;
+
 public class DMWebVideoView extends WebView {
 
+    public static final String UNDERSCORE = "_";
     private WebSettings                         mWebSettings;
     private WebChromeClient                     mChromeClient;
     private VideoView                           mCustomVideoView;
@@ -133,8 +137,29 @@ public class DMWebVideoView extends WebView {
         loadUrl(String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay));
     }
 
-    public void setVideoUrl(String url){
+    public void setVideoEmbedUrl(String url){
         loadUrl(url);
+    }
+
+    public void setVideoUrl(String url){
+        setVideoId(getVideoIdFromUrl(url));
+    }
+
+    public void setVideoUrl(String url, boolean autoPlay){
+        setVideoId(getVideoIdFromUrl(url), autoPlay);
+    }
+
+    public static String getVideoIdFromUrl(String url)
+    {
+        Uri uri = Uri.parse(url);
+        List<String> segments = uri.getPathSegments();
+        if(segments != null && segments.size() != 0) {
+            String lastSegment = segments.get(segments.size() - 1);
+            String[] splits = lastSegment.split(UNDERSCORE);
+            if(splits.length != 0)
+                return splits[0];
+        }
+        return null;
     }
 
     public void hideVideoView(){
