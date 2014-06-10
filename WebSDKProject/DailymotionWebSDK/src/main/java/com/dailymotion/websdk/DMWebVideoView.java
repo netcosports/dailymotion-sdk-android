@@ -42,6 +42,7 @@ public class DMWebVideoView extends WebView {
     private boolean                             mAllowAutomaticNativeFullscreen = false;
     private boolean                             mIsAutoPlay = false;
     private OnFullscreenListener                mOnFullscreenListener;
+    private String                              mUrlPlaying;
 
     public interface OnFullscreenListener {
         public void onFullscreen(boolean isFullscreen);
@@ -138,16 +139,19 @@ public class DMWebVideoView extends WebView {
     }
 
     public void setVideoId(String videoId){
-        loadUrl(String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay));
+        mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
+        loadUrl(mUrlPlaying);
     }
 
     public void setVideoId(String videoId, boolean autoPlay){
         mIsAutoPlay = autoPlay;
-        loadUrl(String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay));
+        mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
+        loadUrl(mUrlPlaying);
     }
 
     public void setVideoEmbedUrl(String url){
-        loadUrl(url);
+        mUrlPlaying = url;
+        loadUrl(mUrlPlaying);
     }
 
     public void setVideoUrl(String url){
@@ -232,6 +236,20 @@ public class DMWebVideoView extends WebView {
         } else {
             loadUrl("");//Hack to stop video
             activity.finish();
+        }
+    }
+
+    public void stop() {
+        if (mUrlPlaying != null) {
+            loadUrl(mUrlPlaying);
+        } else {
+            loadUrl("");
+        }
+    }
+
+    public void load() {
+        if (mUrlPlaying != null) {
+            loadUrl(mUrlPlaying);
         }
     }
 
