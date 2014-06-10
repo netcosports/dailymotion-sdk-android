@@ -41,6 +41,11 @@ public class DMWebVideoView extends WebView {
     private FrameLayout                         mRootLayout;
     private boolean                             mAllowAutomaticNativeFullscreen = false;
     private boolean                             mIsAutoPlay = false;
+    private OnFullscreenListener                mOnFullscreenListener;
+
+    public interface OnFullscreenListener {
+        public void onFullscreen(boolean isFullscreen);
+    }
 
     public DMWebVideoView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -55,6 +60,10 @@ public class DMWebVideoView extends WebView {
     public DMWebVideoView(Context context) {
         super(context);
         init();
+    }
+
+    public void setOnFullscreenListener(OnFullscreenListener listener) {
+        mOnFullscreenListener = listener;
     }
 
     private void init(){
@@ -84,7 +93,7 @@ public class DMWebVideoView extends WebView {
             public void onShowCustomView(View view, CustomViewCallback callback) {
                 super.onShowCustomView(view, callback);
                 ((Activity) getContext()).setVolumeControlStream(AudioManager.STREAM_MUSIC);
-                mIsFullscreen = true;
+                setFullscreen(true);
                 mViewCallback = callback;
                 if (view instanceof FrameLayout){
                     FrameLayout frame = (FrameLayout) view;
@@ -171,7 +180,7 @@ public class DMWebVideoView extends WebView {
             mViewCallback.onCustomViewHidden();
             mChromeClient.onHideCustomView();
             ((Activity) getContext()).setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            mIsFullscreen = false;
+            setFullscreen(false);
         }
 
 
@@ -201,11 +210,20 @@ public class DMWebVideoView extends WebView {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         lp.gravity = Gravity.CENTER;
         mRootLayout.addView(mVideoLayout, lp);
-        mIsFullscreen = true;
+        setFullscreen(true);
     }
 
     public boolean isFullscreen(){
         return mIsFullscreen;
+    }
+
+    private void setFullscreen(boolean isFullscreen){
+        boolean oldState = mIsFullscreen;
+        mIsFullscreen = isFullscreen;
+
+        if (mOnFullscreenListener != null && oldState != isFullscreen) {
+            mOnFullscreenListener.onFullscreen(isFullscreen);
+        }
     }
 
     public void handleBackPress(Activity activity) {
