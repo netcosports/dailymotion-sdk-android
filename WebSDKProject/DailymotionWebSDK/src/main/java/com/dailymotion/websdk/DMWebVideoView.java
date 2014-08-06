@@ -46,6 +46,9 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     protected boolean mIsAutoPlay = false;
     protected OnFullscreenListener mOnFullscreenListener;
     protected String mUrlPlaying;
+    /**
+     * Video model used to retrieve data related to the current loaded video.
+     */
     protected DMWebVideoModel mDmWebVideoModel;
 
     public interface OnFullscreenListener {
@@ -69,7 +72,52 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
     @Override
     public void onVideoDataRetrieved(DMWebVideoModel data) {
+        Log.d("DEBUG===", "onVideoDataRetrieved : " + data.toString());
         mDmWebVideoModel = data;
+    }
+
+    @Override
+    public void onVideoStart() {
+        /**
+         * Should always register this listener after the first start since the javascript method
+         * attached to the play button and the video screen frame are reset.
+         *
+         * Should be run on UI thread since onVideoStart is called form javascript.
+         */
+        this.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DMWebVideoView.this.loadUrl(
+                        DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
+            }
+        }, 1);
+    }
+
+    /**
+     * Start the player.
+     */
+    public void play() {
+        Log.d("DEBUG===", "play");
+        this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_START);
+    }
+
+    /**
+     * Pause the player.
+     */
+    public void pause() {
+        Log.d("DEBUG===", "pause");
+        this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_PAUSE);
+    }
+
+    /**
+     * Move seek bar to the given position.
+     *
+     * @param time time in seconds.
+     */
+    public void seek(int time) {
+        String js = String.format(DMJavascriptInterface.REQUEST_MOVE_SEEK_BAR, time);
+        Log.d("DEBUG===", "seek : time : " + js);
+        this.loadUrl(js);
     }
 
     public void setOnFullscreenListener(OnFullscreenListener listener) {
@@ -162,18 +210,19 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
                 //retrieve video data from the embed player
                 DMWebVideoView.this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_DATA);
+                DMWebVideoView.this.loadUrl(DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
             }
         });
     }
 
     public void setVideoId(String videoId) {
-        mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
-        loadUrl(mUrlPlaying);
+        setVideoId(videoId, false);
     }
 
     public void setVideoId(String videoId, boolean autoPlay) {
         mIsAutoPlay = autoPlay;
         mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
+        Log.d("DEBUG===", "load video : " + mUrlPlaying);
         loadUrl(mUrlPlaying);
     }
 

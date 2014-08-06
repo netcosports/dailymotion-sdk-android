@@ -40,8 +40,13 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
-    public void onPauseVideoRequested() {
+    public void onPlayVideoRequested() {
+        this.play();
+    }
 
+    @Override
+    public void onPauseVideoRequested() {
+        this.pause();
     }
 
     @Override

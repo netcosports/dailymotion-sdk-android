@@ -1,5 +1,6 @@
 package com.dailymotion.websdk;
 
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 /**
@@ -58,6 +59,46 @@ public class DMJavascriptInterface {
     public static final String VAR_STREAM_URL_HLS = "info.stream_hls_url";
 
     /**
+     * Javascript var containing video player src.
+     */
+    public static final String VAR_PLAYER_SRC = "player.implem.backend.player.src";
+
+    /**
+     * Javascript function used to start the player.
+     */
+    public static final String FUNCT_PLAYER_PLAY = "player.implem.play()";
+
+    /**
+     * Javascript function used to pause the player.
+     */
+    public static final String FUNCT_PLAYER_PAUSE = "player.implem.pause()";
+
+    /**
+     * Javascript function used to know if player is paused or not.
+     */
+    public static final String FUNCT_PLAYER_IS_PAUSED = "player.implem.paused()";
+
+    /**
+     * Javascript function used to set current time.
+     */
+    public static final String FUNCT_PLAYER_SET_CURRENT_TIME = "player.implem.seek(%s)";
+
+    /**
+     * Html division for the start screen.
+     */
+    public static final String DIV_START_SCREEN = "startscreen";
+
+    /**
+     * Html division for the entire video frame.
+     */
+    public static final String DIV_VIDEO_FRAME = "controls";
+
+    /**
+     * Html class for play button div.
+     */
+    public static final String CLASS_PLAY_BUTTON = "play.button";
+
+    /**
      * Javascript request which will retrieve video data.
      */
     public static final String REQUEST_VIDEO_DATA = "javascript:" + INTERFACE_NAME +
@@ -72,6 +113,59 @@ public class DMJavascriptInterface {
             + VAR_STREAM_URL_H264_LD + ","
             + VAR_STREAM_URL_HLS
             + ");";
+
+    /**
+     * Javascript request used to start the video player.
+     */
+    public static final String REQUEST_VIDEO_START = "javascript:" +
+            "if(" + VAR_PLAYER_SRC + "==\"\"){" +
+            "   $(\"#" + DIV_START_SCREEN + "\").click();" +
+            "}else{" +
+            "   " + FUNCT_PLAYER_PLAY + ";" +
+            "}";
+
+    /**
+     * Javascript request used to stop the video player.
+     */
+    public static final String REQUEST_VIDEO_PAUSE = "javascript:" +
+            FUNCT_PLAYER_PAUSE + ";";
+
+    /**
+     * Javascript request used to move the video player seek bar.
+     */
+    public static final String REQUEST_MOVE_SEEK_BAR = "javascript:" +
+            FUNCT_PLAYER_SET_CURRENT_TIME + ";";
+
+    /**
+     * Javascript request used to register start listener.
+     */
+    public static final String REQUEST_REGISTRATION_START_LISTENER = "javascript:" +
+            "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",function(){" +
+            "   " + INTERFACE_NAME + ".onPlayerStart();" +
+            "});" +
+            "$(\"#" + DIV_VIDEO_FRAME + "\").bind(\"click\",function(){" +
+            "   " + INTERFACE_NAME + ".onPlayerStart();" +
+            "});";
+
+    /**
+     * Javascript request used to register resume/stop listener on play button click and on video
+     * frame touch.
+     */
+    public static final String REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER = "javascript:" +
+            "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",function(){" +
+            "   if(" + FUNCT_PLAYER_IS_PAUSED + "){" +
+            "       " + INTERFACE_NAME + ".onPlayerPause();" +
+            "   }else{" +
+            "       " + INTERFACE_NAME + ".onPlayerResume();" +
+            "   }" +
+            "});" +
+            "$(\"#" + DIV_VIDEO_FRAME + "\").bind(\"click\",function(){" +
+            "   if(" + FUNCT_PLAYER_IS_PAUSED + "){" +
+            "       " + INTERFACE_NAME + ".onPlayerPause();" +
+            "   }else{" +
+            "       " + INTERFACE_NAME + ".onPlayerResume();" +
+            "   }" +
+            "});";
 
     /**
      * Log cat
@@ -129,14 +223,44 @@ public class DMJavascriptInterface {
     }
 
     /**
+     * Called when user clicked on play button or screen to pause the video.
+     */
+    @JavascriptInterface
+    public void onPlayerPause() {
+        Log.d("DEBUG===", "onPlayerPause");
+    }
+
+    /**
+     * Called when user clicked on play button or screen to resume the video.
+     */
+    @JavascriptInterface
+    public void onPlayerResume() {
+        Log.d("DEBUG===", "onPlayerResume");
+    }
+
+    /**
+     * Called when user clicked on play button or screen to start the video.
+     */
+    @JavascriptInterface
+    public void onPlayerStart() {
+        Log.d("DEBUG===", "onPlayerStart");
+        mListener.onVideoStart();
+    }
+
+    /**
      * Callback interface.
      */
     public interface DMJavascriptInterfaceListener {
         /**
-         * Called when video data has been retrieved
+         * Called when video data has been retrieved.
          *
          * @param data current loaded video model.
          */
         public void onVideoDataRetrieved(DMWebVideoModel data);
+
+        /**
+         * Called when video start the first time.
+         */
+        public void onVideoStart();
     }
 }
