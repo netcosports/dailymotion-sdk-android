@@ -119,9 +119,9 @@ public class DMJavascriptInterface {
      */
     public static final String REQUEST_VIDEO_START = "javascript:" +
             "if(" + VAR_PLAYER_SRC + "==\"\"){" +
-            "   $(\"#" + DIV_START_SCREEN + "\").click();" +
+            "   $(\"#" + DIV_START_SCREEN + "\").click(); console.log(\"div start clicked\")" +
             "}else{" +
-            "   " + FUNCT_PLAYER_PLAY + ";" +
+            "   " + FUNCT_PLAYER_PLAY + ";" + INTERFACE_NAME+".onPlayerStart();"+
             "}";
 
     /**
@@ -143,7 +143,7 @@ public class DMJavascriptInterface {
             "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",function(){" +
             "   " + INTERFACE_NAME + ".onPlayerStart();" +
             "});" +
-            "$(\"#" + DIV_VIDEO_FRAME + "\").bind(\"click\",function(){" +
+            "$(\"#" + DIV_START_SCREEN + "\").bind(\"click\",function(){" +
             "   " + INTERFACE_NAME + ".onPlayerStart();" +
             "});";
 

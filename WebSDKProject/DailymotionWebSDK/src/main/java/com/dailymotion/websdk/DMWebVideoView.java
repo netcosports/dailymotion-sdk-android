@@ -181,7 +181,7 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.d("DEBUG===", consoleMessage.message());
+                Log.d("DEBUG===", "onConsoleMessage : " + consoleMessage.message());
                 return super.onConsoleMessage(consoleMessage);
             }
 
