@@ -1,10 +1,9 @@
 package com.dailymotion.websdk;
 
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 /**
- * Interface used to retrieve data from embed DM video.
+ * Interface used to bind javascript events and interact with DM player from native code.
  */
 public class DMJavascriptInterface {
 
@@ -254,7 +253,6 @@ public class DMJavascriptInterface {
      */
     private DMJavascriptInterfaceListener mListener;
 
-
     /**
      * Default constructor.
      */
@@ -304,7 +302,6 @@ public class DMJavascriptInterface {
      */
     @JavascriptInterface
     public void onPlayerPause() {
-        Log.d("DEBUG===", "onPlayerPause");
         mListener.onVideoPause();
     }
 
@@ -313,7 +310,6 @@ public class DMJavascriptInterface {
      */
     @JavascriptInterface
     public void onPlayerResume() {
-        Log.d("DEBUG===", "onPlayerResume");
         mListener.onVideoResume();
     }
 
@@ -322,7 +318,6 @@ public class DMJavascriptInterface {
      */
     @JavascriptInterface
     public void onPlayerStart() {
-        Log.d("DEBUG===", "onPlayerStart");
         mListener.onVideoStart();
     }
 
@@ -333,7 +328,6 @@ public class DMJavascriptInterface {
      */
     @JavascriptInterface
     public void onCurrentTimeChange(float currentTime) {
-        Log.d("DEBUG===", "onPlayerCurrentTimeChange : " + (long) currentTime);
         mListener.onCurrentTimeChange((long) currentTime);
     }
 

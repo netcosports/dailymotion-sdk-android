@@ -2,7 +2,6 @@ package com.dailymotion.websdk;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.google.sample.castcompanionlibrary.cast.abstracts.ChromeCastPlayerView;
 
@@ -11,6 +10,11 @@ import com.google.sample.castcompanionlibrary.cast.abstracts.ChromeCastPlayerVie
  * ChromeCasted.
  */
 public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements ChromeCastPlayerView {
+
+    /**
+     * Log cat.
+     */
+    private static final String TAG = DMWebVideoViewWithChromeCast.class.getSimpleName();
 
     /**
      * Listener used to catch player event.
@@ -59,7 +63,6 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
 
     @Override
     public void onSynchronizedProgressRequested(long progress) {
-        Log.d("DEBUG===", "onProgressChanges : " + progress);
         this.setCurrentTime(progress);
     }
 
@@ -94,13 +97,12 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
 
     @Override
     public int getCurrentTimeMillis() {
-        int current = 0;
+        int current;
         if (mIsPlaying) {
             current = (int) (System.currentTimeMillis() - mLastCurrentTimeUpdate);
         } else {
             current = (int) mLastCurrenTime;
         }
-        Log.d("DEBUG===", "getCurrentTimeMillis : " + current);
         return current;
     }
 }

@@ -7,7 +7,6 @@
 //
 package com.dailymotion.websdk;
 
-import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
@@ -15,7 +14,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -72,10 +70,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected long mLastCurrenTime;
 
-    public interface OnFullscreenListener {
-        public void onFullscreen(boolean isFullscreen);
-    }
-
     public DMWebVideoView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
@@ -93,7 +87,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
     @Override
     public void onVideoDataRetrieved(DMWebVideoModel data) {
-        Log.d("DEBUG===", "onVideoDataRetrieved : " + data.toString());
         mDmWebVideoModel = data;
     }
 
@@ -145,7 +138,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     public void play() {
         if (!mIsPlaying) {
-            Log.d("DEBUG===", "play");
             mIsPlaying = true;
             this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_START);
         }
@@ -157,7 +149,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     public void pause() {
         if (mIsPlaying) {
-            Log.d("DEBUG===", "pause");
             mIsPlaying = false;
             this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_PAUSE);
         }
@@ -170,7 +161,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     public void setCurrentTime(long time) {
         String js = String.format(DMJavascriptInterface.REQUEST_SET_CURRENT_TIME, (float) time / 1000);
-        Log.d("DEBUG===", "seek : time : " + js);
         this.loadUrl(js);
     }
 
@@ -224,6 +214,93 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
     public void setOnFullscreenListener(OnFullscreenListener listener) {
         mOnFullscreenListener = listener;
+    }
+
+    public void setVideoId(String videoId) {
+        setVideoId(videoId, false);
+    }
+
+    public void setVideoId(String videoId, boolean autoPlay) {
+        mIsAutoPlay = autoPlay;
+        mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
+        loadUrl(mUrlPlaying);
+    }
+
+    public void setVideoEmbedUrl(String url) {
+        mUrlPlaying = url;
+        loadUrl(mUrlPlaying);
+    }
+
+    public void setVideoUrl(String url) {
+        setVideoId(getVideoIdFromUrl(url));
+    }
+
+    public void setVideoUrl(String url, boolean autoPlay) {
+        setVideoId(getVideoIdFromUrl(url), autoPlay);
+    }
+
+    public static String getVideoIdFromUrl(String url) {
+        Uri uri = Uri.parse(url);
+        List<String> segments = uri.getPathSegments();
+        if (segments != null && segments.size() != 0) {
+            String lastSegment = segments.get(segments.size() - 1);
+            String[] splits = lastSegment.split(UNDERSCORE);
+            if (splits.length != 0)
+                return splits[0];
+        }
+        return null;
+    }
+
+    public void hideVideoView() {
+        if (isFullscreen()) {
+            if (mCustomVideoView != null) {
+                mCustomVideoView.stopPlayback();
+            }
+            mRootLayout.removeView(mVideoLayout);
+            mViewCallback.onCustomViewHidden();
+            mChromeClient.onHideCustomView();
+            ((Activity) getContext()).setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            setFullscreen(false);
+        }
+    }
+
+    public void handleBackPress(Activity activity) {
+        if (isFullscreen()) {
+            hideVideoView();
+        } else {
+            loadUrl("");//Hack to stop video
+            activity.finish();
+        }
+    }
+
+    public void stop() {
+        if (mUrlPlaying != null) {
+            loadUrl(mUrlPlaying);
+        } else {
+            loadUrl("");
+        }
+    }
+
+    public void load() {
+        if (mUrlPlaying != null) {
+            loadUrl(mUrlPlaying);
+        }
+    }
+
+    public void setAllowAutomaticNativeFullscreen(boolean allowAutomaticNativeFullscreen) {
+        mAllowAutomaticNativeFullscreen = allowAutomaticNativeFullscreen;
+    }
+
+    public boolean isAutoPlaying() {
+        return mIsAutoPlay;
+    }
+
+    public void setAutoPlaying(boolean autoPlay) {
+        mIsAutoPlay = autoPlay;
+    }
+
+    public boolean isFullscreen() {
+        return mIsFullscreen;
     }
 
     private void init() {
@@ -290,7 +367,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.d("DEBUG===", "onConsoleMessage : " + consoleMessage.message());
                 return super.onConsoleMessage(consoleMessage);
             }
 
@@ -330,57 +406,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         });
     }
 
-    public void setVideoId(String videoId) {
-        setVideoId(videoId, false);
-    }
-
-    public void setVideoId(String videoId, boolean autoPlay) {
-        mIsAutoPlay = autoPlay;
-        mUrlPlaying = String.format(mEmbedUrl, videoId, mAllowAutomaticNativeFullscreen, mIsAutoPlay);
-        Log.d("DEBUG===", "load video : " + mUrlPlaying);
-        loadUrl(mUrlPlaying);
-    }
-
-    public void setVideoEmbedUrl(String url) {
-        mUrlPlaying = url;
-        loadUrl(mUrlPlaying);
-    }
-
-    public void setVideoUrl(String url) {
-        setVideoId(getVideoIdFromUrl(url));
-    }
-
-    public void setVideoUrl(String url, boolean autoPlay) {
-        setVideoId(getVideoIdFromUrl(url), autoPlay);
-    }
-
-    public static String getVideoIdFromUrl(String url) {
-        Uri uri = Uri.parse(url);
-        List<String> segments = uri.getPathSegments();
-        if (segments != null && segments.size() != 0) {
-            String lastSegment = segments.get(segments.size() - 1);
-            String[] splits = lastSegment.split(UNDERSCORE);
-            if (splits.length != 0)
-                return splits[0];
-        }
-        return null;
-    }
-
-    public void hideVideoView() {
-        if (isFullscreen()) {
-            if (mCustomVideoView != null) {
-                mCustomVideoView.stopPlayback();
-            }
-            mRootLayout.removeView(mVideoLayout);
-            mViewCallback.onCustomViewHidden();
-            mChromeClient.onHideCustomView();
-            ((Activity) getContext()).setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            setFullscreen(false);
-        }
-
-
-    }
-
     private void setupVideoLayout(View video) {
 
         /**
@@ -409,10 +434,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         setFullscreen(true);
     }
 
-    public boolean isFullscreen() {
-        return mIsFullscreen;
-    }
-
     private void setFullscreen(boolean isFullscreen) {
         boolean oldState = mIsFullscreen;
         mIsFullscreen = isFullscreen;
@@ -422,38 +443,7 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         }
     }
 
-    public void handleBackPress(Activity activity) {
-        if (isFullscreen()) {
-            hideVideoView();
-        } else {
-            loadUrl("");//Hack to stop video
-            activity.finish();
-        }
-    }
-
-    public void stop() {
-        if (mUrlPlaying != null) {
-            loadUrl(mUrlPlaying);
-        } else {
-            loadUrl("");
-        }
-    }
-
-    public void load() {
-        if (mUrlPlaying != null) {
-            loadUrl(mUrlPlaying);
-        }
-    }
-
-    public void setAllowAutomaticNativeFullscreen(boolean allowAutomaticNativeFullscreen) {
-        mAllowAutomaticNativeFullscreen = allowAutomaticNativeFullscreen;
-    }
-
-    public boolean isAutoPlaying() {
-        return mIsAutoPlay;
-    }
-
-    public void setAutoPlaying(boolean autoPlay) {
-        mIsAutoPlay = autoPlay;
+    public interface OnFullscreenListener {
+        public void onFullscreen(boolean isFullscreen);
     }
 }
