@@ -103,14 +103,4 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
         Log.d("DEBUG===", "getCurrentTimeMillis : " + current);
         return current;
     }
-
-    @Override
-    public void setControllerTimeOut(int timeOut) {
-
-    }
-
-    @Override
-    public int getDefaultTimeOut() {
-        return 0;
-    }
 }
