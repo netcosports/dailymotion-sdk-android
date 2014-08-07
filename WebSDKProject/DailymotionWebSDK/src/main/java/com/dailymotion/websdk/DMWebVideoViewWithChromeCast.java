@@ -8,7 +8,7 @@ import com.google.sample.castcompanionlibrary.cast.abstracts.ChromeCastPlayerVie
 
 /**
  * DailyMotion video player based on {@link DMWebVideoView} which can be
- * Chromecasted.
+ * ChromeCasted.
  */
 public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements ChromeCastPlayerView {
 
@@ -38,6 +38,13 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
                 mDmWebVideoModel.getVideoThumbnailCard(),
                 mDmWebVideoModel.getVideoTitle()
         );
+
+        mute(true);
+    }
+
+    @Override
+    public void onChromeCastDisconnected() {
+        mute(false);
     }
 
     @Override

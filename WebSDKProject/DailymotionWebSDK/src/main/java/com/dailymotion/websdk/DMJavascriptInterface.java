@@ -94,6 +94,11 @@ public class DMJavascriptInterface {
     public static final String FUNCT_PLAYER_SET_CURRENT_TIME = "player.implem.seek(%s)";
 
     /**
+     * Javascript function used to mute the player.
+     */
+    public static final String FUNCT_PLAYER_MUTE = "player.implem.muted(%b)";
+
+    /**
      * Html division for the start screen.
      */
     public static final String DIV_START_SCREEN = "startscreen";
@@ -232,6 +237,12 @@ public class DMJavascriptInterface {
      */
     public static final String REQUEST_HIDE_PLAYER = "javascript:" +
             "$(\"." + CLASS_PLAYER_BAR + "\").hide();";
+
+    /**
+     * Javascript request used to mute the video player.
+     */
+    public static final String REQUEST_PLEYER_MUTE = "javascript:" +
+            "" + FUNCT_PLAYER_MUTE + ";";
 
     /**
      * Log cat

@@ -213,6 +213,15 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         }
     }
 
+    /**
+     * Enable and disable mute.
+     *
+     * @param muteRequest true to mute the player.
+     */
+    public void mute(boolean muteRequest) {
+        this.loadUrl(String.format(DMJavascriptInterface.REQUEST_PLEYER_MUTE, muteRequest));
+    }
+
     public void setOnFullscreenListener(OnFullscreenListener listener) {
         mOnFullscreenListener = listener;
     }
