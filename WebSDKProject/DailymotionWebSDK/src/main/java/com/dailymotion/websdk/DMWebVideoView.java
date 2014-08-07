@@ -56,6 +56,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected boolean mIsPlaying;
 
+    /**
+     * True when play button is bind.
+     */
+    protected boolean mIsPlayButtonBind;
+
     public interface OnFullscreenListener {
         public void onFullscreen(boolean isFullscreen);
     }
@@ -89,13 +94,16 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
          *
          * Should be run on UI thread since onVideoStart is called form javascript.
          */
-        this.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                DMWebVideoView.this.loadUrl(
-                        DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
-            }
-        }, 1);
+        if (!mIsPlayButtonBind) {
+            this.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    DMWebVideoView.this.loadUrl(
+                            DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
+                }
+            }, 1);
+            mIsPlayButtonBind = true;
+        }
 
         mIsPlaying = true;
     }
@@ -114,16 +122,23 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      * Start the player.
      */
     public void play() {
-        Log.d("DEBUG===", "play");
-        this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_START);
+        if (!mIsPlaying) {
+            Log.d("DEBUG===", "play");
+            mIsPlaying = true;
+            this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_START);
+        }
+
     }
 
     /**
      * Pause the player.
      */
     public void pause() {
-        Log.d("DEBUG===", "pause");
-        this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_PAUSE);
+        if (mIsPlaying) {
+            Log.d("DEBUG===", "pause");
+            mIsPlaying = false;
+            this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_PAUSE);
+        }
     }
 
     /**
@@ -144,6 +159,7 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     private void init() {
 
         mIsPlaying = false;
+        mIsPlayButtonBind = false;
 
         //The topmost layout of the window where the actual VideoView will be added to
         mRootLayout = (FrameLayout) ((Activity) getContext()).getWindow().getDecorView();

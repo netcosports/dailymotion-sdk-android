@@ -140,18 +140,22 @@ public class DMJavascriptInterface {
      * Javascript request used to register start listener.
      */
     public static final String REQUEST_REGISTRATION_START_LISTENER = "javascript:" +
-            "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",function(){" +
+            "var playHandler = function() {" +
             "   " + INTERFACE_NAME + ".onPlayerStart();" +
-            "});" +
-            "$(\"#" + DIV_START_SCREEN + "\").bind(\"click\",function(){" +
+            "};" +
+            "var screenHandler = function() {" +
             "   " + INTERFACE_NAME + ".onPlayerStart();" +
-            "});";
+            "};" +
+            "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",playHandler);" +
+            "$(\"#" + DIV_START_SCREEN + "\").bind(\"click\",screenHandler);";
 
     /**
      * Javascript request used to register resume/stop listener on play button click and on video
      * frame touch.
      */
     public static final String REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER = "javascript:" +
+            "$(\"." + CLASS_PLAY_BUTTON + "\").unbind(\"click\",playHandler);" +
+            "$(\"#" + DIV_START_SCREEN + "\").unbind(\"click\",screenHandler);" +
             "$(\"." + CLASS_PLAY_BUTTON + "\").bind(\"click\",function(){" +
             "   if(" + FUNCT_PLAYER_IS_PAUSED + "){" +
             "       " + INTERFACE_NAME + ".onPlayerPause();" +
