@@ -64,6 +64,11 @@ public class DMJavascriptInterface {
     public static final String VAR_PLAYER_SRC = "player.implem.backend.player.src";
 
     /**
+     * Javascript var containing video player current time.
+     */
+    public static final String VAR_PLAYER_CURRENT_TIME = "player.implem.backend.player.currentTime";
+
+    /**
      * Javascript function used to start the player.
      */
     public static final String FUNCT_PLAYER_PLAY = "player.implem.play()";
@@ -131,10 +136,11 @@ public class DMJavascriptInterface {
             FUNCT_PLAYER_PAUSE + ";";
 
     /**
-     * Javascript request used to move the video player seek bar.
+     * Javascript request used to set current time of the video.
      */
-    public static final String REQUEST_MOVE_SEEK_BAR = "javascript:" +
-            FUNCT_PLAYER_SET_CURRENT_TIME + ";";
+    public static final String REQUEST_SET_CURRENT_TIME = "javascript:" +
+            VAR_PLAYER_CURRENT_TIME + "=%f;";
+
 
     /**
      * Javascript request used to register start listener.

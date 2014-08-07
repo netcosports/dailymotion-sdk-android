@@ -2,6 +2,7 @@ package com.dailymotion.websdk;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.google.sample.castcompanionlibrary.cast.abstracts.ChromeCastPlayerView;
 
@@ -50,8 +51,9 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
-    public void onProgressChanged(int progress) {
-
+    public void onSynchronizedProgressRequested(long progress) {
+        Log.d("DEBUG===", "onProgressChanges : " + progress);
+        this.setCurrentTime(progress);
     }
 
     @Override

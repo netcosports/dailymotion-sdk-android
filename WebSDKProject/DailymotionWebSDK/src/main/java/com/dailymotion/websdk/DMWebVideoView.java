@@ -142,12 +142,12 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     /**
-     * Move seek bar to the given position.
+     * Set current time to loaded video.
      *
-     * @param time time in seconds.
+     * @param time time in millseconds
      */
-    public void seek(int time) {
-        String js = String.format(DMJavascriptInterface.REQUEST_MOVE_SEEK_BAR, time);
+    public void setCurrentTime(long time) {
+        String js = String.format(DMJavascriptInterface.REQUEST_SET_CURRENT_TIME, (float) time / 1000);
         Log.d("DEBUG===", "seek : time : " + js);
         this.loadUrl(js);
     }
