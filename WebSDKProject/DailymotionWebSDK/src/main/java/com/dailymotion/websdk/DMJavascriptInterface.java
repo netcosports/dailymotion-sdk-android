@@ -104,6 +104,11 @@ public class DMJavascriptInterface {
     public static final String CLASS_PLAY_BUTTON = "play.button";
 
     /**
+     * Html class for progress bar
+     */
+    public static final String CLASS_PLAYER_PROGRESS_BAR = "progress-bar-interaction";
+
+    /**
      * Javascript request which will retrieve video data.
      */
     public static final String REQUEST_VIDEO_DATA = "javascript:" + INTERFACE_NAME +
@@ -175,6 +180,15 @@ public class DMJavascriptInterface {
             "   }else{" +
             "       " + INTERFACE_NAME + ".onPlayerResume();" +
             "   }" +
+            "});";
+
+    /**
+     * Javascript request used to register progress bar event in order to catch setting
+     * new current time event.
+     */
+    public static final String REQUEST_REGISTRATION_PROGRESS_LISTENER = "javascript:" +
+            "$(\"." + CLASS_PLAYER_PROGRESS_BAR + "\").bind(\"touchend\",function(){" +
+            "   " + INTERFACE_NAME + ".onCurrentTimeChange(" + VAR_PLAYER_CURRENT_TIME + "*1000);" +
             "});";
 
     /**
@@ -260,6 +274,17 @@ public class DMJavascriptInterface {
     }
 
     /**
+     * Called when user use th progress bar to change the current time.
+     *
+     * @param currentTime new current time in millisecond.
+     */
+    @JavascriptInterface
+    public void onCurrentTimeChange(float currentTime) {
+        Log.d("DEBUG===", "onPlayerCurrentTimeChange : " + (long) currentTime);
+        mListener.onCurrentTimeChange((long) currentTime);
+    }
+
+    /**
      * Callback interface.
      */
     public interface DMJavascriptInterfaceListener {
@@ -284,5 +309,12 @@ public class DMJavascriptInterface {
          * Called from JavaScript when video has been paused.
          */
         public void onVideoPause();
+
+        /**
+         * Called from JavaScript when current time has changed.
+         *
+         * @param newTime new current time in milli.
+         */
+        public void onCurrentTimeChange(long newTime);
     }
 }

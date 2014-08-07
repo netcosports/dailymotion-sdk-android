@@ -61,6 +61,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected boolean mIsPlayButtonBind;
 
+    /**
+     * Timestamp set when current time changed.
+     */
+    protected long mLastCurrentTimeUpdate;
+
     public interface OnFullscreenListener {
         public void onFullscreen(boolean isFullscreen);
     }
@@ -98,11 +103,16 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
             this.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+
+                    //register listener on html component only available once video has started
                     DMWebVideoView.this.loadUrl(
                             DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
+                    DMWebVideoView.this.loadUrl(
+                            DMJavascriptInterface.REQUEST_REGISTRATION_PROGRESS_LISTENER);
                 }
             }, 1);
             mIsPlayButtonBind = true;
+            mLastCurrentTimeUpdate = System.currentTimeMillis();
         }
 
         mIsPlaying = true;
@@ -116,6 +126,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     @Override
     public void onVideoPause() {
         mIsPlaying = false;
+    }
+
+    @Override
+    public void onCurrentTimeChange(long newTime) {
+        mLastCurrentTimeUpdate = System.currentTimeMillis();
     }
 
     /**
@@ -244,8 +259,12 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                 super.onPageFinished(view, url);
 
                 //retrieve video data from the embed player
-                DMWebVideoView.this.loadUrl(DMJavascriptInterface.REQUEST_VIDEO_DATA);
-                DMWebVideoView.this.loadUrl(DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
+                DMWebVideoView.this.loadUrl(
+                        DMJavascriptInterface.REQUEST_VIDEO_DATA);
+
+                //register listener on html widget
+                DMWebVideoView.this.loadUrl(
+                        DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
             }
         });
     }

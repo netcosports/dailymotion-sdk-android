@@ -69,6 +69,12 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
+    public void onCurrentTimeChange(long newTime) {
+        super.onCurrentTimeChange(newTime);
+        mChromeCastPlayerViewListener.onCurrentTimeChanged(newTime);
+    }
+
+    @Override
     public void setChromeCastPlayerViewListener(ChromeCastPlayerViewListener listener) {
         mChromeCastPlayerViewListener = listener;
     }
