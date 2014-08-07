@@ -80,9 +80,17 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
-    public int getCurrentProgress() {
-        return 0;
+    public int getCurrentTimeMillis() {
+        int current = 0;
+        if (mIsPlaying) {
+            current = (int) (System.currentTimeMillis() - mLastCurrentTimeUpdate);
+        } else {
+            current = (int) mLastCurrenTime;
+        }
+        Log.d("DEBUG===", "getCurrentTimeMillis : " + current);
+        return current;
     }
+
 
     @Override
     public void setAlwaysShowController() {

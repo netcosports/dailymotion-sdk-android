@@ -66,6 +66,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected long mLastCurrentTimeUpdate;
 
+    /**
+     * Last known current time in milli.
+     */
+    protected long mLastCurrenTime;
+
     public interface OnFullscreenListener {
         public void onFullscreen(boolean isFullscreen);
     }
@@ -131,6 +136,7 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     @Override
     public void onCurrentTimeChange(long newTime) {
         mLastCurrentTimeUpdate = System.currentTimeMillis();
+        mLastCurrenTime = newTime;
     }
 
     /**
