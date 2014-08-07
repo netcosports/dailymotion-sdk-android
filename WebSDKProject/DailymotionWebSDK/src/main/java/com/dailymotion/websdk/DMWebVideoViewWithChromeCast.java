@@ -57,6 +57,12 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
+    public void onAlwaysShowControllerRequested(boolean always) {
+        //if player should always be shown, disable auto hiding.
+        enableAutoHiding(!always);
+    }
+
+    @Override
     public void onVideoResume() {
         super.onVideoResume();
         mChromeCastPlayerViewListener.onPlayerPlayClicked();
@@ -89,12 +95,6 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
         }
         Log.d("DEBUG===", "getCurrentTimeMillis : " + current);
         return current;
-    }
-
-
-    @Override
-    public void setAlwaysShowController() {
-
     }
 
     @Override

@@ -84,6 +84,11 @@ public class DMJavascriptInterface {
     public static final String FUNCT_PLAYER_IS_PAUSED = "player.implem.paused()";
 
     /**
+     * Javascript function used to auto hide the player on idle.
+     */
+    public static final String FUNCT_PLAYER_AUTO_HIDE = "setTimeout";
+
+    /**
      * Javascript function used to set current time.
      */
     public static final String FUNCT_PLAYER_SET_CURRENT_TIME = "player.implem.seek(%s)";
@@ -107,6 +112,11 @@ public class DMJavascriptInterface {
      * Html class for progress bar
      */
     public static final String CLASS_PLAYER_PROGRESS_BAR = "progress-bar-interaction";
+
+    /**
+     * Html class for the whole player bar.
+     */
+    public static final String CLASS_PLAYER_BAR = "bar";
 
     /**
      * Javascript request which will retrieve video data.
@@ -190,6 +200,38 @@ public class DMJavascriptInterface {
             "$(\"." + CLASS_PLAYER_PROGRESS_BAR + "\").bind(\"touchend\",function(){" +
             "   " + INTERFACE_NAME + ".onCurrentTimeChange(" + VAR_PLAYER_CURRENT_TIME + "*1000);" +
             "});";
+
+    /**
+     * Javascript request used to store auto hide timer for future usage.
+     */
+    public static final String REQUEST_AUTO_HIDE_INITIALIZATION = "javascript:" +
+            "var oldSetTimeout = " + FUNCT_PLAYER_AUTO_HIDE + ";";
+
+    /**
+     * Javascript request used to disable player auto hiding.
+     */
+    public static final String REQUEST_DISABLE_AUTO_HIDE = "javascript:" +
+            "" + FUNCT_PLAYER_AUTO_HIDE + " = function(){};";
+
+    /**
+     * Javascript request used to restore player auto hiding
+     */
+    public static final String REQUEST_RESTORE_AUTO_HIDE = "javascript:" +
+            "" + FUNCT_PLAYER_AUTO_HIDE + " = oldSetTimeout;";
+    ;
+
+    /**
+     * Javascript request used to display the video player bar.
+     */
+    public static final String REQUEST_SHOW_PLAYER = "javascript:" +
+            "$(\"." + CLASS_PLAYER_BAR + "\").show();" +
+            "$(\"#" + DIV_VIDEO_FRAME + "\").addClass(\"visible\");";
+
+    /**
+     * Javascript request used to hide the video player bar.
+     */
+    public static final String REQUEST_HIDE_PLAYER = "javascript:" +
+            "$(\"." + CLASS_PLAYER_BAR + "\").hide();";
 
     /**
      * Log cat

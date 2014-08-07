@@ -13,6 +13,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -173,6 +174,45 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         this.loadUrl(js);
     }
 
+    /**
+     * Show the player bar.
+     */
+    public void displayPlayerBar() {
+        this.loadUrl(DMJavascriptInterface.REQUEST_SHOW_PLAYER);
+    }
+
+    /**
+     * Hide the player bar.
+     */
+    public void hidePlayerBar() {
+        this.loadUrl(DMJavascriptInterface.REQUEST_HIDE_PLAYER);
+    }
+
+    /**
+     * Use to control the auto hiding behavior of the player bar.
+     *
+     * @param enable true if auto hiding should be enable
+     */
+    public void enableAutoHiding(boolean enable) {
+        if (enable) {
+            //should restore auto hiding
+            this.loadUrl(DMJavascriptInterface.REQUEST_RESTORE_AUTO_HIDE);
+
+            //hide the player bar if the video is playing
+            if (mIsPlaying) {
+                hidePlayerBar();
+            }
+        } else {
+            //should disable auto hiding
+            this.loadUrl(DMJavascriptInterface.REQUEST_DISABLE_AUTO_HIDE);
+
+            //display the player bar if the video is playing
+            if (mIsPlaying) {
+                displayPlayerBar();
+            }
+        }
+    }
+
     public void setOnFullscreenListener(OnFullscreenListener listener) {
         mOnFullscreenListener = listener;
     }
@@ -189,6 +229,10 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         mWebSettings.setJavaScriptEnabled(true);
         mWebSettings.setPluginState(WebSettings.PluginState.ON);
         mWebSettings.setUserAgentString(mWebSettings.getUserAgentString() + mExtraUA);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
 
         mChromeClient = new WebChromeClient() {
 
@@ -271,6 +315,8 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                 //register listener on html widget
                 DMWebVideoView.this.loadUrl(
                         DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
+                DMWebVideoView.this.loadUrl(
+                        DMJavascriptInterface.REQUEST_AUTO_HIDE_INITIALIZATION);
             }
         });
     }
