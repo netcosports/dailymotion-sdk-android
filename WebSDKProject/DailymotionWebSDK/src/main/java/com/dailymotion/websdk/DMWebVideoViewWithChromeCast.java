@@ -55,6 +55,18 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
+    public void onVideoResume() {
+        super.onVideoResume();
+        mChromeCastPlayerViewListener.onPlayerPlayClicked();
+    }
+
+    @Override
+    public void onVideoPause() {
+        super.onVideoPause();
+        mChromeCastPlayerViewListener.onPlayerPauseClicked();
+    }
+
+    @Override
     public void setChromeCastPlayerViewListener(ChromeCastPlayerViewListener listener) {
         mChromeCastPlayerViewListener = listener;
     }

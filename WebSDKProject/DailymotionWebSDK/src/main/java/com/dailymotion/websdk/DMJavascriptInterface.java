@@ -119,9 +119,9 @@ public class DMJavascriptInterface {
      */
     public static final String REQUEST_VIDEO_START = "javascript:" +
             "if(" + VAR_PLAYER_SRC + "==\"\"){" +
-            "   $(\"#" + DIV_START_SCREEN + "\").click(); console.log(\"div start clicked\")" +
+            "   $(\"#" + DIV_START_SCREEN + "\").click();" +
             "}else{" +
-            "   " + FUNCT_PLAYER_PLAY + ";" + INTERFACE_NAME+".onPlayerStart();"+
+            "   " + FUNCT_PLAYER_PLAY + ";" + INTERFACE_NAME + ".onPlayerStart();" +
             "}";
 
     /**
@@ -228,6 +228,7 @@ public class DMJavascriptInterface {
     @JavascriptInterface
     public void onPlayerPause() {
         Log.d("DEBUG===", "onPlayerPause");
+        mListener.onVideoPause();
     }
 
     /**
@@ -236,6 +237,7 @@ public class DMJavascriptInterface {
     @JavascriptInterface
     public void onPlayerResume() {
         Log.d("DEBUG===", "onPlayerResume");
+        mListener.onVideoResume();
     }
 
     /**
@@ -252,15 +254,25 @@ public class DMJavascriptInterface {
      */
     public interface DMJavascriptInterfaceListener {
         /**
-         * Called when video data has been retrieved.
+         * Called from JavaScript when video data has been retrieved.
          *
          * @param data current loaded video model.
          */
         public void onVideoDataRetrieved(DMWebVideoModel data);
 
         /**
-         * Called when video start the first time.
+         * Called from JavaScript  when video start the first time.
          */
         public void onVideoStart();
+
+        /**
+         * Called from JavaScript when video has been resumed.
+         */
+        public void onVideoResume();
+
+        /**
+         * Called from JavaScript when video has been paused.
+         */
+        public void onVideoPause();
     }
 }

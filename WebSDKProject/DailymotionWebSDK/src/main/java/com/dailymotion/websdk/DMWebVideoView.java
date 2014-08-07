@@ -51,6 +51,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected DMWebVideoModel mDmWebVideoModel;
 
+    /**
+     * True is the loaded video is being played.
+     */
+    protected boolean mIsPlaying;
+
     public interface OnFullscreenListener {
         public void onFullscreen(boolean isFullscreen);
     }
@@ -91,6 +96,18 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                         DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
             }
         }, 1);
+
+        mIsPlaying = true;
+    }
+
+    @Override
+    public void onVideoResume() {
+        mIsPlaying = true;
+    }
+
+    @Override
+    public void onVideoPause() {
+        mIsPlaying = false;
     }
 
     /**
@@ -125,6 +142,8 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     private void init() {
+
+        mIsPlaying = false;
 
         //The topmost layout of the window where the actual VideoView will be added to
         mRootLayout = (FrameLayout) ((Activity) getContext()).getWindow().getDecorView();
