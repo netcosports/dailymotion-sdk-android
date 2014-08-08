@@ -217,6 +217,19 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     /**
+     * Display / hide fullscreen button.
+     *
+     * @param enable true if fullscreen button should be displayed.
+     */
+    public void enableFullscreenButton(boolean enable) {
+        if (enable) {
+            this.loadUrl(DMJavascriptInterface.REQUEST_SHOW_FULLSCREEN_BUTTON);
+        } else {
+            this.loadUrl(DMJavascriptInterface.REQUEST_HIDE_FULLSCREEN_BUTTON);
+        }
+    }
+
+    /**
      * Enable and disable mute.
      *
      * @param muteRequest true to mute the player.

@@ -128,6 +128,11 @@ public class DMJavascriptInterface {
     public static final String CLASS_PLAYER_BAR = "bar";
 
     /**
+     * Html class for the whole player bar.
+     */
+    public static final String CLASS_FULLSCREEN_BUTTON = "fullscreen.button";
+
+    /**
      * Javascript request which will retrieve video data.
      */
     public static final String REQUEST_VIDEO_DATA = "javascript:" + INTERFACE_NAME +
@@ -263,6 +268,18 @@ public class DMJavascriptInterface {
             //restore div initial id to restore auto hiding and touch behavior
             "$(\"#social\").attr(\"id\",\"" + DIV_SOCIAL_ICONS + "\");" +
             "$(\"#" + DIV_SOCIAL_ICONS + "\").show();";
+
+    /**
+     * Javascript request used to hide fullscreen button.
+     */
+    public static final String REQUEST_HIDE_FULLSCREEN_BUTTON = "javascript:" +
+            "$(\"." + CLASS_FULLSCREEN_BUTTON + "\").hide();";
+
+    /**
+     * Javascript request used to show fullscreen button.
+     */
+    public static final String REQUEST_SHOW_FULLSCREEN_BUTTON = "javascript:" +
+            "$(\"." + CLASS_FULLSCREEN_BUTTON + "\").show();";
 
     /**
      * Log cat

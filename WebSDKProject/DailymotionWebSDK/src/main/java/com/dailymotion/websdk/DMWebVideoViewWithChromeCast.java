@@ -37,11 +37,13 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     public void onVideoStart() {
         super.onVideoStart();
 
-        //disable social bar
+        //since onVideoStart is called from javascript, we need a runnable on uiThread for any
+        //further ui process
         this.postDelayed(new Runnable() {
             @Override
             public void run() {
                 enableSocialBar(false);
+                enableFullscreenButton(false);
             }
         }, 1);
     }
