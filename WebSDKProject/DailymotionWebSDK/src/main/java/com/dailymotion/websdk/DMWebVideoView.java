@@ -9,6 +9,7 @@ package com.dailymotion.websdk;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -439,7 +440,10 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return super.shouldOverrideUrlLoading(view, url);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                getContext().startActivity(i);
+                return true;
             }
         });
     }
