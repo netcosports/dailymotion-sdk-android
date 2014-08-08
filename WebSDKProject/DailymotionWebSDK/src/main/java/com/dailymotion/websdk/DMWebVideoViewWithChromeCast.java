@@ -34,6 +34,37 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
+    public void onVideoStart() {
+        super.onVideoStart();
+
+        //disable social bar
+        this.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                enableSocialBar(false);
+            }
+        }, 1);
+    }
+
+    @Override
+    public void onVideoResume() {
+        super.onVideoResume();
+        mChromeCastPlayerViewListener.onPlayerPlayClicked();
+    }
+
+    @Override
+    public void onVideoPause() {
+        super.onVideoPause();
+        mChromeCastPlayerViewListener.onPlayerPauseClicked();
+    }
+
+    @Override
+    public void onCurrentTimeChange(long newTime) {
+        super.onCurrentTimeChange(newTime);
+        mChromeCastPlayerViewListener.onCurrentTimeChanged(newTime);
+    }
+
+    @Override
     public void onChromeCastReady() {
 
         //send current DM video to the ChromeCast
@@ -70,24 +101,6 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     public void onAlwaysShowControllerRequested(boolean always) {
         //if player should always be shown, disable auto hiding.
         enableAutoHiding(!always);
-    }
-
-    @Override
-    public void onVideoResume() {
-        super.onVideoResume();
-        mChromeCastPlayerViewListener.onPlayerPlayClicked();
-    }
-
-    @Override
-    public void onVideoPause() {
-        super.onVideoPause();
-        mChromeCastPlayerViewListener.onPlayerPauseClicked();
-    }
-
-    @Override
-    public void onCurrentTimeChange(long newTime) {
-        super.onCurrentTimeChange(newTime);
-        mChromeCastPlayerViewListener.onCurrentTimeChanged(newTime);
     }
 
     @Override

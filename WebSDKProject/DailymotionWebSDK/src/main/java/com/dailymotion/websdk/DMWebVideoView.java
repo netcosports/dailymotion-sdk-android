@@ -204,12 +204,25 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     /**
+     * Display / hide social icons (FB and Twitter)
+     *
+     * @param enable true if social bar should be displayed.
+     */
+    public void enableSocialBar(boolean enable) {
+        if (enable) {
+            this.loadUrl(DMJavascriptInterface.REQUEST_SHOW_SOCIAL_BAR);
+        } else {
+            this.loadUrl(DMJavascriptInterface.REQUEST_HIDE_SOCIAL_BAR);
+        }
+    }
+
+    /**
      * Enable and disable mute.
      *
      * @param muteRequest true to mute the player.
      */
     public void mute(boolean muteRequest) {
-        this.loadUrl(String.format(DMJavascriptInterface.REQUEST_PLEYER_MUTE, muteRequest));
+        this.loadUrl(String.format(DMJavascriptInterface.REQUEST_PLAYER_MUTE, muteRequest));
     }
 
     public void setOnFullscreenListener(OnFullscreenListener listener) {
@@ -303,6 +316,21 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         return mIsFullscreen;
     }
 
+    /**
+     * Called when the video has been loaded.
+     */
+    protected void onVideoLoaded() {
+        //retrieve video data from the embed player
+        DMWebVideoView.this.loadUrl(
+                DMJavascriptInterface.REQUEST_VIDEO_DATA);
+
+        //register listener on html widget
+        DMWebVideoView.this.loadUrl(
+                DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
+        DMWebVideoView.this.loadUrl(
+                DMJavascriptInterface.REQUEST_AUTO_HIDE_INITIALIZATION);
+    }
+
     private void init() {
 
         mIsPlaying = false;
@@ -380,6 +408,7 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
             public void onHideCustomView() {
                 super.onHideCustomView();
             }
+
         };
 
         setWebChromeClient(mChromeClient);
@@ -392,16 +421,12 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                DMWebVideoView.this.onVideoLoaded();
+            }
 
-                //retrieve video data from the embed player
-                DMWebVideoView.this.loadUrl(
-                        DMJavascriptInterface.REQUEST_VIDEO_DATA);
-
-                //register listener on html widget
-                DMWebVideoView.this.loadUrl(
-                        DMJavascriptInterface.REQUEST_REGISTRATION_START_LISTENER);
-                DMWebVideoView.this.loadUrl(
-                        DMJavascriptInterface.REQUEST_AUTO_HIDE_INITIALIZATION);
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return super.shouldOverrideUrlLoading(view, url);
             }
         });
     }

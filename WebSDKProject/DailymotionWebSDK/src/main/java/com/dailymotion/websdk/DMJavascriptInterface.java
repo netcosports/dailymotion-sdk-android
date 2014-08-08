@@ -108,6 +108,11 @@ public class DMJavascriptInterface {
     public static final String DIV_VIDEO_FRAME = "controls";
 
     /**
+     * Html division for the social icons (fb and twitter).
+     */
+    public static final String DIV_SOCIAL_ICONS = "topbar";
+
+    /**
      * Html class for play button div.
      */
     public static final String CLASS_PLAY_BUTTON = "play.button";
@@ -240,8 +245,24 @@ public class DMJavascriptInterface {
     /**
      * Javascript request used to mute the video player.
      */
-    public static final String REQUEST_PLEYER_MUTE = "javascript:" +
+    public static final String REQUEST_PLAYER_MUTE = "javascript:" +
             "" + FUNCT_PLAYER_MUTE + ";";
+
+    /**
+     * Javascript request used to hide social icons.
+     */
+    public static final String REQUEST_HIDE_SOCIAL_BAR = "javascript:" +
+            "$(\"#" + DIV_SOCIAL_ICONS + "\").hide();" +
+            //change div id since auto hiding routine and touch will pop social bar
+            "$(\"#" + DIV_SOCIAL_ICONS + "\").attr(\"id\",\"social\");";
+
+    /**
+     * Javascript request used to display social icons.
+     */
+    public static final String REQUEST_SHOW_SOCIAL_BAR = "javascript:" +
+            //restore div initial id to restore auto hiding and touch behavior
+            "$(\"#social\").attr(\"id\",\"" + DIV_SOCIAL_ICONS + "\");" +
+            "$(\"#" + DIV_SOCIAL_ICONS + "\").show();";
 
     /**
      * Log cat
