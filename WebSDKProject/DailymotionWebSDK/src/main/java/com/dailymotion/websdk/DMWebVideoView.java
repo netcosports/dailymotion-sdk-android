@@ -10,22 +10,20 @@ package com.dailymotion.websdk;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.ConsoleMessage;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.VideoView;
+import android.widget.RelativeLayout;
 
 import java.util.List;
 
@@ -34,14 +32,10 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     public static final String UNDERSCORE = "_";
     protected WebSettings mWebSettings;
     protected WebChromeClient mChromeClient;
-    protected VideoView mCustomVideoView;
-    protected WebChromeClient.CustomViewCallback mViewCallback;
 
     protected final String mEmbedUrl = "http://www.dailymotion.com/embed/video/%s?html=1&fullscreen=%s&autoPlay=%s";
     protected final String mExtraUA = "; DailymotionEmbedSDK 1.0";
-    protected FrameLayout mVideoLayout;
     protected boolean mIsFullscreen = false;
-    protected FrameLayout mRootLayout;
     protected boolean mAllowAutomaticNativeFullscreen = false;
     protected boolean mIsAutoPlay = false;
     protected OnFullscreenListener mOnFullscreenListener;
@@ -71,6 +65,26 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
      */
     protected long mLastCurrenTime;
 
+    /**
+     * Top most layout used to display the full screen mode.
+     */
+    private FrameLayout mRootLayout;
+
+    /**
+     * Layout params used to add the fullscreen layout.
+     */
+    private FrameLayout.LayoutParams mFullscreenParams;
+
+    /**
+     * Layout that holds the video player in normal mode.
+     */
+    private RelativeLayout mRealLayout;
+
+    /**
+     * Real layout params used to restore the state of the player when leaving fullscreen mode.
+     */
+    private RelativeLayout.LayoutParams mRealParams;
+
     public DMWebVideoView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
@@ -84,6 +98,20 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     public DMWebVideoView(Context context) {
         super(context);
         init();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        if (mRealLayout == null) {
+
+            /**
+             * Init layout actually holding the player to be able to restore
+             * it when leaving fullscreen mode.
+             */
+            initHoldingLayout();
+        }
     }
 
     @Override
@@ -278,28 +306,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         return null;
     }
 
-    public void hideVideoView() {
-        if (isFullscreen()) {
-            if (mCustomVideoView != null) {
-                mCustomVideoView.stopPlayback();
-            }
-            mRootLayout.removeView(mVideoLayout);
-            mViewCallback.onCustomViewHidden();
-            mChromeClient.onHideCustomView();
-            ((Activity) getContext()).setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            setFullscreen(false);
-        }
-    }
-
-    public void handleBackPress(Activity activity) {
-        if (isFullscreen()) {
-            hideVideoView();
-        } else {
-            loadUrl("");//Hack to stop video
-            activity.finish();
-        }
-    }
-
     public void stop() {
         if (mUrlPlaying != null) {
             loadUrl(mUrlPlaying);
@@ -331,6 +337,33 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     /**
+     * Display the player in fullscreen mode.
+     *
+     * @param enable true if the player should be displayed in fullscreen, false to restore it.
+     */
+    public void setFullscreen(boolean enable) {
+
+        if (enable && !isFullscreen()) {
+
+            //enable full screen mode if requested and not yet displayed.
+            mRealParams = ((RelativeLayout.LayoutParams) this.getLayoutParams());
+            mRealLayout.removeView(this);
+            mRootLayout.addView(this, mFullscreenParams);
+
+        } else if (!enable && isFullscreen()) {
+
+            //disable fullscreen if requested and fullscreen mode displayed.
+            mRootLayout.removeView(this);
+            mRealLayout.addView(this, mRealParams);
+
+        }
+
+        mIsFullscreen = enable;
+
+        this.requestLayout();
+    }
+
+    /**
      * Called when the video has been loaded.
      */
     protected void onVideoLoaded() {
@@ -345,17 +378,72 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                 DMJavascriptInterface.REQUEST_AUTO_HIDE_INITIALIZATION);
     }
 
+    /**
+     * Initialize the Dailymotion web video player view.
+     */
     private void init() {
 
         mIsPlaying = false;
         mIsPlayButtonBind = false;
+        mIsFullscreen = false;
 
-        //The topmost layout of the window where the actual VideoView will be added to
+        //init top most layout for fullscreen mode
+        initRootLayout();
+
+        //init layout which will holds the player in fullscreen mode
+        initFullscreenLayoutParams();
+
+        //init webview that holding the player.
+        initWebComponent();
+    }
+
+    /**
+     * Init root layout which will holds the fullscreen layout in fullscreen mode.
+     * The topmost layout of the window where the actual VideoView will be added to.
+     */
+    private void initRootLayout() {
         mRootLayout = (FrameLayout) ((Activity) getContext()).getWindow().getDecorView();
+    }
 
+    /**
+     * Init parent layout which actually holds the player.
+     * <p/>
+     * Currently, only RelativeLayout are available since constrain should be enough to restore
+     * the player when leaving the fullscreen mode.
+     * <p/>
+     * TODO handle LinearLayout by storing the child position.
+     */
+    private void initHoldingLayout() {
+
+        ViewParent parent = this.getParent();
+
+        if (parent != null) {
+            if (!(parent instanceof ViewGroup) || !(parent instanceof RelativeLayout)) {
+                throw new IllegalStateException("DMWebVideoView must be holds by a relative layout.");
+            } else {
+                mRealLayout = ((RelativeLayout) parent);
+            }
+        }
+    }
+
+    /**
+     * Init the layout params used to display fullscreen player.
+     */
+    private void initFullscreenLayoutParams() {
+        //init layout params
+        mFullscreenParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        mFullscreenParams.gravity = Gravity.CENTER;
+    }
+
+    /**
+     * Init webview and websettings to be able to display th dailymotion player.
+     * <p/>
+     * Initialize also the javascript interface which will map player button to
+     * native events and native callbacks.
+     */
+    private void initWebComponent() {
         mWebSettings = getSettings();
         mWebSettings.setJavaScriptEnabled(true);
-        mWebSettings.setPluginState(WebSettings.PluginState.ON);
         mWebSettings.setUserAgentString(mWebSettings.getUserAgentString() + mExtraUA);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -373,54 +461,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                 ProgressBar pb = new ProgressBar(getContext());
                 pb.setIndeterminate(true);
                 return pb;
-            }
-
-            @Override
-            public void onShowCustomView(View view, CustomViewCallback callback) {
-                super.onShowCustomView(view, callback);
-                ((Activity) getContext()).setVolumeControlStream(AudioManager.STREAM_MUSIC);
-                setFullscreen(true);
-                mViewCallback = callback;
-                if (view instanceof FrameLayout) {
-                    FrameLayout frame = (FrameLayout) view;
-                    if (frame.getFocusedChild() instanceof VideoView) {//We are in 2.3
-                        VideoView video = (VideoView) frame.getFocusedChild();
-                        frame.removeView(video);
-
-                        setupVideoLayout(video);
-
-                        mCustomVideoView = video;
-                        mCustomVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-                            @Override
-                            public void onCompletion(MediaPlayer mediaPlayer) {
-                                hideVideoView();
-                            }
-                        });
-
-
-                    } else {//Handle 4.x
-
-                        setupVideoLayout(view);
-
-                    }
-                }
-            }
-
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                return super.onConsoleMessage(consoleMessage);
-            }
-
-            @Override
-            public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) // Only available in API level 14+
-            {
-                onShowCustomView(view, callback);
-            }
-
-            @Override
-            public void onHideCustomView() {
-                super.onHideCustomView();
             }
 
         };
@@ -446,43 +486,6 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                 return true;
             }
         });
-    }
-
-    private void setupVideoLayout(View video) {
-
-        /**
-         * As we don't want the touch events to be processed by the underlying WebView, we do not set the WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE flag
-         * But then we have to handle directly back press in our View to exit fullscreen.
-         * Otherwise the back button will be handled by the topmost Window, id-est the player controller
-         */
-        mVideoLayout = new FrameLayout(getContext()) {
-
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent event) {
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                    hideVideoView();
-                    return true;
-                }
-
-                return super.dispatchKeyEvent(event);
-            }
-        };
-
-        mVideoLayout.setBackgroundResource(R.color.black);
-        mVideoLayout.addView(video);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        lp.gravity = Gravity.CENTER;
-        mRootLayout.addView(mVideoLayout, lp);
-        setFullscreen(true);
-    }
-
-    private void setFullscreen(boolean isFullscreen) {
-        boolean oldState = mIsFullscreen;
-        mIsFullscreen = isFullscreen;
-
-        if (mOnFullscreenListener != null && oldState != isFullscreen) {
-            mOnFullscreenListener.onFullscreen(isFullscreen);
-        }
     }
 
     public interface OnFullscreenListener {
