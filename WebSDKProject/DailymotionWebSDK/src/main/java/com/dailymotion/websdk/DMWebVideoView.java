@@ -10,6 +10,7 @@ package com.dailymotion.websdk;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -137,6 +138,8 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
                             DMJavascriptInterface.REQUEST_REGISTRATION_PAUSE_RESUME_LISTENER);
                     DMWebVideoView.this.loadUrl(
                             DMJavascriptInterface.REQUEST_REGISTRATION_PROGRESS_LISTENER);
+                    DMWebVideoView.this.loadUrl(
+                            DMJavascriptInterface.REQUEST_REGISTRATION_FULLSCREEN_TOGGLE_LISTENER);
                 }
             }, 1);
             mIsPlayButtonBind = true;
@@ -160,6 +163,16 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     public void onCurrentTimeChange(long newTime) {
         mLastCurrentTimeUpdate = System.currentTimeMillis();
         mLastCurrenTime = newTime;
+    }
+
+    @Override
+    public void onFullscreenButtonToggle() {
+        this.post(new Runnable() {
+            @Override
+            public void run() {
+                setFullscreen(!mIsFullscreen, true);
+            }
+        });
     }
 
     /**
@@ -267,6 +280,11 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         this.loadUrl(String.format(DMJavascriptInterface.REQUEST_PLAYER_MUTE, muteRequest));
     }
 
+    /**
+     * Register listener to catch fullscreen callback.
+     *
+     * @param listener listener.
+     */
     public void setOnFullscreenListener(OnFullscreenListener listener) {
         mOnFullscreenListener = listener;
     }
@@ -337,11 +355,29 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
     }
 
     /**
+     * Should be linked to the
+     * {@link android.app.Activity#onConfigurationChanged(android.content.res.Configuration)}
+     * to display fullscreen mode in landscape orientation.
+     *
+     * @param newConfig new configuration.
+     */
+    public void onConfigurationChanged(Configuration newConfig) {
+        int orientation = newConfig.orientation;
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE && !isFullscreen()) {
+            setFullscreen(true, false);
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT && isFullscreen()) {
+            setFullscreen(false, false);
+        }
+    }
+
+    /**
      * Display the player in fullscreen mode.
      *
-     * @param enable true if the player should be displayed in fullscreen, false to restore it.
+     * @param enable   true if the player should be displayed in fullscreen, false to restore it.
+     * @param fromUser true if the fullscreen mode is request by the user, false if it's requested from onConfigurationChange.
      */
-    public void setFullscreen(boolean enable) {
+    public void setFullscreen(boolean enable, boolean fromUser) {
 
         if (enable && !isFullscreen()) {
 
@@ -350,12 +386,18 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
             mRealLayout.removeView(this);
             mRootLayout.addView(this, mFullscreenParams);
 
+            if (mOnFullscreenListener != null) {
+                mOnFullscreenListener.onFullscreen(true, fromUser);
+            }
         } else if (!enable && isFullscreen()) {
 
             //disable fullscreen if requested and fullscreen mode displayed.
             mRootLayout.removeView(this);
             mRealLayout.addView(this, mRealParams);
 
+            if (mOnFullscreenListener != null) {
+                mOnFullscreenListener.onFullscreen(false, fromUser);
+            }
         }
 
         mIsFullscreen = enable;
@@ -488,7 +530,17 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
         });
     }
 
+    /**
+     * Listener used to catch fullscreen event.
+     */
     public interface OnFullscreenListener {
-        public void onFullscreen(boolean isFullscreen);
+        /**
+         * Called when full screen mode is displayed.
+         *
+         * @param isFullscreen true if fullscreen is up, false otherwise.
+         * @param fromUser     true if the fullscreen mode has been set up after user touched
+         *                     fullscreen button.
+         */
+        public void onFullscreen(boolean isFullscreen, boolean fromUser);
     }
 }

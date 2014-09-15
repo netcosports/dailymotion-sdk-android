@@ -43,7 +43,7 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
             @Override
             public void run() {
                 enableSocialBar(false);
-                enableFullscreenButton(false);
+//                enableFullscreenButton(false);
             }
         }, 1);
     }
