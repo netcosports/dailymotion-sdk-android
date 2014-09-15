@@ -1,5 +1,6 @@
 package com.dailymotion.websdk;
 
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 /**
@@ -216,6 +217,14 @@ public class DMJavascriptInterface {
             "});";
 
     /**
+     * Javascript request used to register fullscreen button click callback.
+     */
+    public static final String REQUEST_REGISTRATION_FULLSCREEN_TOGGLE_LISTENER = "javascript:" +
+            "$(\"." + CLASS_FULLSCREEN_BUTTON + "\").bind(\"click\",function(){" +
+            "   " + INTERFACE_NAME + ".onFullscreenButtonToggle();" +
+            "});";
+
+    /**
      * Javascript request used to store auto hide timer for future usage.
      */
     public static final String REQUEST_AUTO_HIDE_INITIALIZATION = "javascript:" +
@@ -360,13 +369,21 @@ public class DMJavascriptInterface {
     }
 
     /**
-     * Called when user use th progress bar to change the current time.
+     * Called when user use the progress bar to change the current time.
      *
      * @param currentTime new current time in millisecond.
      */
     @JavascriptInterface
     public void onCurrentTimeChange(float currentTime) {
         mListener.onCurrentTimeChange((long) currentTime);
+    }
+
+    /**
+     * Called when user press the fullscreen button.
+     */
+    @JavascriptInterface
+    public void onFullscreenButtonToggle() {
+        mListener.onFullscreenButtonToggle();
     }
 
     /**
@@ -401,5 +418,10 @@ public class DMJavascriptInterface {
          * @param newTime new current time in milli.
          */
         public void onCurrentTimeChange(long newTime);
+
+        /**
+         * Called from JavaScript when user press fullscreen button.
+         */
+        public void onFullscreenButtonToggle();
     }
 }
