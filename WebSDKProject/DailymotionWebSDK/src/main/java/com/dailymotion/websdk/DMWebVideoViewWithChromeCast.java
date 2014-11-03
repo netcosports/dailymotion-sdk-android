@@ -74,6 +74,7 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
                 mDmWebVideoModel.getHigherQualityAvailableStreamUrl(),
                 mDmWebVideoModel.getVideoThumbnailCard(),
                 mDmWebVideoModel.getVideoTitle(),
+                null,
                 null
         );
 
