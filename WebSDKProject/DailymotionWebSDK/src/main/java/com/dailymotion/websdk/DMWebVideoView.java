@@ -522,9 +522,10 @@ public class DMWebVideoView extends WebView implements DMJavascriptInterface.DMJ
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                getContext().startActivity(i);
+                view.loadUrl(url);
+//                Intent i = new Intent(Intent.ACTION_VIEW);
+//                i.setData(Uri.parse(url));
+//                getContext().startActivity(i);
                 return true;
             }
         });
