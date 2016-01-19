@@ -3,14 +3,14 @@ package com.dailymotion.websdk;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.google.sample.castcompanionlibrary.cast.abstracts.ChromeCastPlayerView;
+import com.google.android.gms.cast.ApplicationMetadata;
+import com.netcosports.cast.abstracts.ChromeCastPlayerView;
 
 /**
  * DailyMotion video player based on {@link DMWebVideoView} which can be
  * ChromeCasted.
  */
 public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements ChromeCastPlayerView {
-
     /**
      * Log cat.
      */
@@ -19,7 +19,7 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     /**
      * Listener used to catch player event.
      */
-    private ChromeCastPlayerViewListener mChromeCastPlayerViewListener;
+    private ChromeCastRemoteListener mChromeCastPlayerViewListener;
 
     public DMWebVideoViewWithChromeCast(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -68,12 +68,27 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
 
     @Override
     public void onChromeCastReady() {
-
         //send current DM video to the ChromeCast
         mChromeCastPlayerViewListener.onMediaSelected(
                 mDmWebVideoModel.getHigherQualityAvailableStreamUrl(),
                 mDmWebVideoModel.getVideoThumbnailCard(),
                 mDmWebVideoModel.getVideoTitle(),
+                null,
+                null,
+                null
+        );
+
+        mute(true);
+    }
+
+    @Override
+    public void onChromeCastReady(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
+        //send current DM video to the ChromeCast
+        mChromeCastPlayerViewListener.onMediaSelected(
+                mDmWebVideoModel.getHigherQualityAvailableStreamUrl(),
+                mDmWebVideoModel.getVideoThumbnailCard(),
+                mDmWebVideoModel.getVideoTitle(),
+                null,
                 null,
                 null
         );
@@ -97,6 +112,16 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
+    public void onBufferVideoRequested() {
+
+    }
+
+    @Override
+    public void onIdleVideoRequested() {
+
+    }
+
+    @Override
     public void onSynchronizedProgressRequested(long progress) {
         this.setCurrentTime(progress);
     }
@@ -108,8 +133,9 @@ public class DMWebVideoViewWithChromeCast extends DMWebVideoView implements Chro
     }
 
     @Override
-    public void setChromeCastPlayerViewListener(ChromeCastPlayerViewListener listener) {
+    public void setChromeCastRemoteListener(ChromeCastRemoteListener listener) {
         mChromeCastPlayerViewListener = listener;
+
     }
 
     @Override
